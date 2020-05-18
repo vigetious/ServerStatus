@@ -7,14 +7,13 @@ using System.Text.Json;
 namespace ServerStatus {
     class Program {
         static void Main(string[] args) {
-            bool configMode;
+            Server server;
             if (args.Contains("-c")) {
-                configMode = true;
+                server = new Server(true);
             } else {
-                configMode = false;
+                server = new Server(false);
             }
-            Server server = new Server(configMode);
-            Console.WriteLine(JsonSerializer.Serialize(""));
+            Console.WriteLine(server.Cpu.Cputemp);
         }
     }
 }

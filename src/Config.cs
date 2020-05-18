@@ -4,15 +4,23 @@ using System.Text.Json;
 
 namespace ServerStatus {
     public class Config {
-                public class ConfigBuilder {
+        private ConfigBuilder config;
+
+        public ConfigBuilder Configuration => config;
+
+        public Config(bool configMode) {
+            config = CheckConfigFile(configMode);
+        }
+        
+        public class ConfigBuilder {
             public int overrideCpuCount { get; set; }
             public bool degreesTemperatureScale { get; set; }
         }
 
         public static ConfigBuilder CheckConfigFile(bool configMode) {
-            if (File.Exists("config.json")) {
+            if (File.Exists("../../../config/config.json")) {
                 // read from existing config file
-                var json = JsonSerializer.Deserialize<ConfigBuilder>(File.ReadAllText("config.json"));
+                var json = JsonSerializer.Deserialize<ConfigBuilder>(File.ReadAllText("../../../config/config.json"));
                 if (configMode) {
                     Console.WriteLine("Config file already exists. Editing...");
                     var newJson = EditConfig(json);
@@ -38,7 +46,7 @@ namespace ServerStatus {
             ConfigBuilder configBuilder = new ConfigBuilder();
             configBuilder.overrideCpuCount = 0;
             configBuilder.degreesTemperatureScale = true;
-            File.WriteAllText("config.json", JsonSerializer.Serialize(configBuilder));
+            File.WriteAllText("../../../config/config.json", JsonSerializer.Serialize(configBuilder));
             return configBuilder;
         }
         
@@ -81,7 +89,7 @@ namespace ServerStatus {
             }
             configBuilder.overrideCpuCount = cpuCount;
             configBuilder.degreesTemperatureScale = degreesTemperatureScale;
-            File.WriteAllText("config.json", JsonSerializer.Serialize(configBuilder));
+            File.WriteAllText("../../../config/config.json", JsonSerializer.Serialize(configBuilder));
             return configBuilder;
         }
     }

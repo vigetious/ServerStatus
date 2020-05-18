@@ -2,32 +2,32 @@ using System.Diagnostics;
 
 namespace ServerStatus {
     public class Server {
-        private int cpucount;
+        private Config config;
+        private CPU cpu;
 
-        public int CpuCount {
-            get => cpucount;
-        }
+        public Config Config => config;
+
+        public CPU Cpu => cpu;
 
         public Server(bool configMode) {
             if (configMode) {
-                Config.CheckConfigFile(true);
+                config = new Config(true);
             } else {
-                Config.CheckConfigFile(false);
+                config = new Config(false);
             }
-            cpucount = int.Parse(ExecuteCommand("nproc", string.Empty));
+            cpu = new CPU(config.Configuration.overrideCpuCount);
         }
 
-        public static string ExecuteCommand(string command, string args) {
+        public static string ExecuteCommand(string args) {
             var proc = new Process() {
                 StartInfo = new ProcessStartInfo {
-                    FileName = command,
-                    Arguments = args,
+                    FileName = "/bin/bash",
+                    Arguments = $"../../../config/commands.sh {args}",
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                     CreateNoWindow = true
                 }
             };
-            //proc.StartInfo.FileName = command;
             proc.Start();
             string output = proc.StandardOutput.ReadToEnd();
             proc.WaitForExit();
