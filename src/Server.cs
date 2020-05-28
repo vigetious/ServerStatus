@@ -15,7 +15,7 @@ namespace ServerStatus {
             } else {
                 config = new Config(false);
             }
-            cpu = new CPU(config.Configuration.overrideCpuCount);
+            cpu = new CPU(config.Configuration.overrideCpuCount, config.Configuration.degreesTemperatureScale);
         }
 
         public static string ExecuteCommand(string args) {

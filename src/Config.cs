@@ -53,10 +53,9 @@ namespace ServerStatus {
         private static ConfigBuilder EditConfig(ConfigBuilder json) {
             ConfigBuilder configBuilder = new ConfigBuilder();
             if (json != null) {
-                Console.WriteLine(
-                    $"Override CPU count? Current config is set to {json.overrideCpuCount}. Enter 0 to auto-detect the CPU count or enter a number.");
+                Console.WriteLine($"Override physical CPU count? Current config is set to {json.overrideCpuCount}. Enter 0 to auto-detect the CPU count or enter a number.");
             } else {
-                Console.WriteLine("Override CPU count? Enter 0 to auto-detect the CPU count or enter a number.");
+                Console.WriteLine("Override physical CPU count? Enter 0 to auto-detect the CPU count or enter a number.");
             }
             int cpuCount;
             while (true) {
