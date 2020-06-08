@@ -15,8 +15,8 @@ namespace ServerStatus {
                 } else {
                     server = new Server(false);
                 }
-                for (int x = 0; x < server.Cpu.CpuCount; x++) {
-                        Console.WriteLine($"Core {x}: {server.Cpu.Cputemp[x]}");
+                for (int x = 0; x < server.Cpu.Cpucores.Count; x++) {
+                        Console.WriteLine($"Core {server.Cpu.Cpucores[x].Corenumber}: temp: {server.Cpu.Cpucores[x].Coretemp}");
                 }
                 //Thread.Sleep(1000);
             //}

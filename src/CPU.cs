@@ -7,48 +7,40 @@ using Newtonsoft.Json.Linq;
 
 namespace ServerStatus {
     public class CPU {
-        private readonly int _cpucount;
-        private readonly int _cputheorycount;
+        
         private readonly List<float> _cputemp;
         private readonly List<double> _cpuutil;
+        private readonly List<Core> _cpucores;
+
+        private readonly JObject _newcputemp;
         
-        public int CpuCount {
-            get => _cpucount;
-        }
+
 
         public List<double> CpuUtil => _cpuutil;
 
         public List<float> Cputemp => _cputemp;
 
+        public List<Core> Cpucores => _cpucores;
+
         public CPU(int cpuCount, bool degreesTemperatureScale) {
-            _cpucount = getCpuCount(cpuCount);
-            _cputheorycount = getCpuTheoryCount();
-            _cputemp = getCpuTemperatures(degreesTemperatureScale);
-            _cpuutil = getCpuUtilization();
-            foreach (var VARIABLE in _cpuutil) {
-                Console.WriteLine(VARIABLE);
+            _cpucores = new List<Core>();
+            _newcputemp = getCpuTemperatures();
+            //_cputemp = getCpuTemperatures(degreesTemperatureScale);
+            //_cpuutil = getCpuUtilization();
+            for (var x = 0; x < cpuCount; x++) {
+                int hyperthreadcore = x + cpuCount;
+                _cpucores.Add(new Core(x, hyperthreadcore, _newcputemp, degreesTemperatureScale));
             }
         }
 
-        private static int getCpuCount(int cpuOverride) {
-            if (cpuOverride == 0) {
-                return int.Parse(Server.ExecuteCommand("cpuCount"));
-            } else {
-                return cpuOverride;
-            }
-        }
-
-        private static int getCpuTheoryCount() {
-            return int.Parse(Server.ExecuteCommand("cpuTheoryCount")) - 2;
-        }
-        
-        private List<float> getCpuTemperatures(bool degreesTemperatureScale) { // SORT THIS OUT, NEEDS OPTIMIZING
+        private JObject getCpuTemperatures() { // SORT THIS OUT, NEEDS OPTIMIZING
             string sensorsJson = Server.ExecuteCommand("cpuTemp");
             JObject test = JsonConvert.DeserializeObject<JObject>(sensorsJson);
             List<float> cpuTempList = new List<float>();
-            foreach (JToken attribute in test["coretemp-isa-0000"]) {
+            
+            /*foreach (JToken attribute in test["coretemp-isa-0000"]) {
                 JProperty attProperty = attribute.ToObject<JProperty>();
-                for (var x = 0; x < _cpucount; x++) {
+                for (var x = 0; x < _cpuphysicalcount; x++) {
                     if (attProperty.Name == "Core " + x) {
                         foreach (var temp in attribute.Children()) {
                             if (degreesTemperatureScale) {
@@ -59,21 +51,17 @@ namespace ServerStatus {
                         }
                     }
                 }
-            }
+            }*/
 
-            return cpuTempList;
+            return test;
         }
 
-        private float ConvertToF(float temp) {
-            return (temp * 9 / 5) + 32;
-        }
-
-        private List<double> getCpuUtilization() {
+        /*private List<double> getCpuUtilization() {
             List<double> cpuUtilization = new List<double>(); // list of cpu cores, each holding stat data
             using (StreamReader fs = new StreamReader("/proc/stat")) {
                 string line;
                 while((line = fs.ReadLine()) != null) {
-                    for (var x = 0; x < _cputheorycount; x++) {
+                    for (var x = 0; x < _cpucount; x++) {
                         int lastIdle = 0;
                         int lastTotal = 0;
                         if (line.StartsWith($"cpu{x}")) {
@@ -94,6 +82,6 @@ namespace ServerStatus {
             }
 
             return cpuUtilization;
-        }
+        }*/
     }
 }
