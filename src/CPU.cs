@@ -33,9 +33,8 @@ namespace ServerStatus {
 
         private JObject getCpuTemperatures() {
             string sensorsJson = Server.ExecuteCommand("cpuTemp");
-            JObject test = JsonConvert.DeserializeObject<JObject>(sensorsJson);
-            List<float> cpuTempList = new List<float>();
-            return test;
+            JObject temps = JsonConvert.DeserializeObject<JObject>(sensorsJson);
+            return temps;
         }
     }
 }

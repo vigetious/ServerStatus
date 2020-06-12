@@ -14,4 +14,10 @@ memoryUsed)
 memoryTotal)
   free -m | awk 'FNR == 2 {print $2}'
   ;;
+networkInterfaces)
+  ip -j link
+  ;;
+networkSpeed)
+  cat /sys/class/net/"$2"/statistics/rx_bytes
+  ;;
 esac
