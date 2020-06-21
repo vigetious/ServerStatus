@@ -18,6 +18,6 @@ networkInterfaces)
   ip -j link
   ;;
 networkSpeed)
-  cat /sys/class/net/"$2"/statistics/rx_bytes
+  cat /sys/class/net/"$2"/statistics/"$3"
   ;;
 esac

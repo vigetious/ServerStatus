@@ -2,20 +2,20 @@ using System.Reflection.Metadata.Ecma335;
 
 namespace ServerStatus {
     public class Memory {
-        private int used;
-        private int total;
-        private int free;
+        private readonly int _used;
+        private readonly int _total;
+        private readonly int _free;
 
-        public int Used => used;
+        public int Used => _used;
 
-        public int Total => total;
+        public int Total => _total;
 
-        public int Free => free;
+        public int Free => _free;
 
         public Memory() {
-            used = getUsed();
-            total = getTotal();
-            free = total - used;
+            _used = getUsed();
+            _total = getTotal();
+            _free = _total - _used;
         }
 
         private int getTotal() {

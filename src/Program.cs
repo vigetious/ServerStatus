@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -8,6 +9,7 @@ using System.Threading;
 namespace ServerStatus {
     class Program {
         static void Main(string[] args) {
+            Network oldRecieved = new Network();
             while (true) {
                 Server server;
                 if (args.Contains("-c")) {
@@ -26,7 +28,15 @@ namespace ServerStatus {
                 
                 Network network = new Network();
                 
-                Thread.Sleep(2000);
+                for (int i = 0; i < network.InterfaceNames.Count; i++) {
+                    long newRecieved = network.Speeds[i].Recieved;
+                    if (oldRecieved.Speeds[i].Recieved != 0) {
+                        Console.WriteLine($"Speed of {network.Speeds[i].Name}: " + (newRecieved - oldRecieved.Speeds[i].Recieved) / 102400.0);
+                    }
+                    oldRecieved.Speeds[i].Recieved = newRecieved;
+                }
+                
+                Thread.Sleep(1000);
             }
         }
     }
