@@ -5,39 +5,50 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading;
+using Grapevine.Interfaces.Server;
+using Grapevine.Server;
+using Grapevine.Server.Attributes;
+using Grapevine.Shared;
+using Newtonsoft.Json;
 
 namespace ServerStatus {
+    [RestResource]
     class Program {
         static void Main(string[] args) {
-            Network oldRecieved = new Network();
-            while (true) {
-                Server server;
-                if (args.Contains("-c")) {
-                    server = new Server(true);
-                } else {
-                    server = new Server(false);
-                }
-
-                for (int x = 0; x < server.Cpu.Cpucores.Count; x++) {
-                    Console.WriteLine(
-                        $"Core {server.Cpu.Cpucores[x].Corenumber}: temp: {server.Cpu.Cpucores[x].Coretemp}");
-                }
-
-                Console.WriteLine(
-                    $"Memory: Total: {server.Memory.Total}M; Used: {server.Memory.Used}M; Free: {server.Memory.Free}M");
-                
-                Network network = new Network();
-                
-                for (int i = 0; i < network.InterfaceNames.Count; i++) {
-                    long newRecieved = network.Speeds[i].Recieved;
-                    if (oldRecieved.Speeds[i].Recieved != 0) {
-                        Console.WriteLine($"Speed of {network.Speeds[i].Name}: " + (newRecieved - oldRecieved.Speeds[i].Recieved) / 102400.0);
-                    }
-                    oldRecieved.Speeds[i].Recieved = newRecieved;
-                }
-                
-                Thread.Sleep(1000);
+            using (var restServer = new RestServer()) {
+                restServer.Port = "9090";
+                restServer.LogToConsole().Start();
+                Console.ReadLine();
+                restServer.Stop();
             }
+        }
+
+        [RestRoute(HttpMethod = HttpMethod.GET, PathInfo = "/server")]
+        public IHttpContext GetServer(IHttpContext content) {
+            Server server = new Server();
+            content.Response.SendResponse(JsonConvert.SerializeObject(server));
+            return content;
+        }
+
+        [RestRoute(HttpMethod = HttpMethod.GET, PathInfo = "/config")]
+        public IHttpContext GetServerConfig(IHttpContext content) {
+            Server server = new Server();
+            content.Response.SendResponse(JsonConvert.SerializeObject(server.Config.Configuration));
+            return content;
+        }
+
+        [RestRoute(HttpMethod = HttpMethod.POST, PathInfo = "/config")]
+        public IHttpContext SendServerConfig(IHttpContext content) {
+            Config newConfig = new Config(true, content.Request.Payload);
+            content.Response.SendResponse("success");
+            return content;
+        }
+
+        [RestRoute(HttpMethod = HttpMethod.GET, PathInfo = "/network")]
+        public IHttpContext SendServerNetwork(IHttpContext content) {
+            Network network = new Network();
+            content.Response.SendResponse(JsonConvert.SerializeObject(network));
+            return content;
         }
     }
 }

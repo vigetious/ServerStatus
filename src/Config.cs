@@ -2,7 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.Json;
+using Newtonsoft.Json;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace ServerStatus {
     public class Config {
@@ -10,8 +11,13 @@ namespace ServerStatus {
 
         public ConfigBuilder Configuration => config;
 
-        public Config(bool configMode) {
-            config = CheckConfigFile(configMode);
+        public Config(bool configMode, string config = "") {
+            if (configMode) {
+                ConfigBuilder newConfig = JsonConvert.DeserializeObject<ConfigBuilder>(config);
+                this.config = CheckConfigFile(configMode, newConfig);
+            } else {
+                this.config = CheckConfigFile(configMode, new ConfigBuilder());
+            }
         }
         
         public class ConfigBuilder {
@@ -19,14 +25,16 @@ namespace ServerStatus {
             public bool degreesTemperatureScale { get; set; }
         }
 
-        public static ConfigBuilder CheckConfigFile(bool configMode) {
-            if (File.Exists("../../../config/config.json")) {
+        public static ConfigBuilder CheckConfigFile(bool configMode, ConfigBuilder newConfig) {
+            if (File.Exists("config/config.json")) {
                 // read from existing config file
-                var json = JsonSerializer.Deserialize<ConfigBuilder>(File.ReadAllText("../../../config/config.json"));
+                var json = JsonSerializer.Deserialize<ConfigBuilder>(File.ReadAllText("config/config.json"));
                 if (configMode) {
                     Console.WriteLine("Config file already exists. Editing...");
-                    var newJson = EditConfig(json);
-                    return newJson;
+                    File.WriteAllText("config/config.json", JsonSerializer.Serialize(newConfig));
+                    return newConfig;
+                    //var newJson = EditConfig(newConfig);
+                    //return newJson;
                 } else {
                     Console.WriteLine("Config file already exists. Moving on...");
                     return json;
@@ -35,8 +43,10 @@ namespace ServerStatus {
                 // if config file is gone, create a new one with default settings
                 if (configMode) {
                     Console.WriteLine("Config file is missing. Creating custom config file...");
-                    var newJson = EditConfig(null);
-                    return newJson;
+                    File.WriteAllText("config/config.json", JsonSerializer.Serialize(newConfig));
+                    return newConfig;
+                    //var newJson = EditConfig(null);
+                    //return newJson;
                 } else {
                     Console.WriteLine("Config file is missing. Creating new with default values...");
                     return CreateConfig();
@@ -48,7 +58,7 @@ namespace ServerStatus {
             ConfigBuilder configBuilder = new ConfigBuilder();
             configBuilder.overrideCpuCount = 0;
             configBuilder.degreesTemperatureScale = true;
-            File.WriteAllText("../../../config/config.json", JsonSerializer.Serialize(configBuilder));
+            File.WriteAllText("config/config.json", JsonSerializer.Serialize(configBuilder));
             return configBuilder;
         }
         
@@ -90,7 +100,7 @@ namespace ServerStatus {
             }
             configBuilder.overrideCpuCount = cpuCount;
             configBuilder.degreesTemperatureScale = degreesTemperatureScale;
-            File.WriteAllText("../../../config/config.json", JsonSerializer.Serialize(configBuilder));
+            File.WriteAllText("config/config.json", JsonSerializer.Serialize(configBuilder));
             return configBuilder;
         }
     }

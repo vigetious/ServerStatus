@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
+using Grapevine.Server.Attributes;
 
 namespace ServerStatus {
     public class Server {
@@ -20,20 +21,15 @@ namespace ServerStatus {
             get => _cpuphysicalcount;
         }
 
-        public Server(bool configMode) {
-            if (configMode) {
-                config = new Config(true);
-            } else {
-                config = new Config(false);
-            }
-            
+        public Server() {
+            config = new Config(false);
             _cpucount = getCpuTheoryCount();
             _cpuphysicalcount = getCpuCount(config.Configuration.overrideCpuCount);
 
             _cpu = new CPU(_cpuphysicalcount, config.Configuration.degreesTemperatureScale);
             _memory = new Memory();
         }
-        
+
         private static int getCpuCount(int cpuOverride) {
             if (cpuOverride == 0) {
                 return int.Parse(Server.ExecuteCommand("cpuPhysicalCount"));
@@ -50,7 +46,7 @@ namespace ServerStatus {
             var proc = new Process() {
                 StartInfo = new ProcessStartInfo {
                     FileName = "/bin/bash",
-                    Arguments = $"../../../config/commands.sh {args}",
+                    Arguments = $"config/commands.sh {args}",
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                     CreateNoWindow = true
